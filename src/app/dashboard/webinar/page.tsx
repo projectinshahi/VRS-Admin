@@ -44,8 +44,18 @@ export default function AdminWebinarPage() {
     try {
       const { startDateTime, australiaTimeZone, ...rest } = form;
 
+      const selectedZone = TIMEZONES.find(
+        (tz) => tz.value === australiaTimeZone,
+      )?.zone;
+
+      if (!selectedZone) {
+        toast.error("Invalid Timezone");
+        setLoading(false);
+        return;
+      }
+
       const zonedDate = DateTime.fromISO(startDateTime, {
-        zone: australiaTimeZone,
+        zone: selectedZone,
       });
 
       const utcDate = zonedDate.toUTC().toISO();
@@ -96,6 +106,34 @@ export default function AdminWebinarPage() {
     }
   };
 
+  const TIMEZONES = [
+    {
+      value: "AWST",
+      label: "Australian Western Standard Time (AWST) – UTC+8",
+      zone: "Australia/Perth",
+    },
+    {
+      value: "ACST",
+      label: "Australian Central Standard Time (ACST) – UTC+9:30",
+      zone: "Australia/Darwin",
+    },
+    {
+      value: "ACDT",
+      label: "Australian Central Daylight Time (ACDT) – UTC+10:30",
+      zone: "Australia/Adelaide",
+    },
+    {
+      value: "AEST",
+      label: "Australian Eastern Standard Time (AEST) – UTC+10",
+      zone: "Australia/Brisbane",
+    },
+    {
+      value: "AEDT",
+      label: "Australian Eastern Daylight Time (AEDT) – UTC+11",
+      zone: "Australia/Sydney",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 text-black p-10">
       <div className="max-w-4xl mx-auto">
@@ -135,13 +173,12 @@ export default function AdminWebinarPage() {
             className="w-full border border-gray-300 p-3 rounded-lg"
           >
             <option value="">Select Time Zone</option>
-            <option value="Australia/Perth">Perth (AWST)</option>
-            <option value="Australia/Darwin">Darwin (ACST)</option>
-            <option value="Australia/Brisbane">Brisbane (AEST)</option>
-            <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
-            <option value="Australia/Melbourne">Melbourne (AEST/AEDT)</option>
-            <option value="Australia/Adelaide">Adelaide (ACST/ACDT)</option>
-            <option value="Australia/Hobart">Hobart (AEST/AEDT)</option>
+
+            {TIMEZONES.map((tz) => (
+              <option key={tz.value} value={tz.value}>
+                {tz.label}
+              </option>
+            ))}
           </select>
 
           {/* Date & Time */}
