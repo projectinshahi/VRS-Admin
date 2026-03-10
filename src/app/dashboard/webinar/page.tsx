@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { DateTime } from "luxon";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -16,7 +15,8 @@ export default function AdminWebinarPage() {
     australiaTimeZone: "",
     meetLink: "",
     recordingLink: "",
-    startDateTime: "",
+    day: "",
+    time: "",
   });
 
   const fetchWebinars = async () => {
@@ -37,33 +37,14 @@ export default function AdminWebinarPage() {
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { startDateTime, australiaTimeZone, ...rest } = form;
-
-      const selectedZone = TIMEZONES.find(
-        (tz) => tz.value === australiaTimeZone,
-      )?.zone;
-
-      if (!selectedZone) {
-        toast.error("Invalid Timezone");
-        setLoading(false);
-        return;
-      }
-
-      const zonedDate = DateTime.fromISO(startDateTime, {
-        zone: selectedZone,
-      });
-
-      const utcDate = zonedDate.toUTC().toISO();
-
       const payload = {
-        ...rest,
-        australiaTimeZone,
-        startDateTime: utcDate,
+        ...form,
       };
 
       const res = await fetch(`${API}/api/webinars`, {
@@ -79,10 +60,11 @@ export default function AdminWebinarPage() {
       setForm({
         title: "",
         description: "",
-        startDateTime: "",
         australiaTimeZone: "",
         meetLink: "",
         recordingLink: "",
+        day: "",
+        time: "",
       });
 
       fetchWebinars();
@@ -110,27 +92,22 @@ export default function AdminWebinarPage() {
     {
       value: "AWST",
       label: "Australian Western Standard Time (AWST) – UTC+8",
-      zone: "Australia/Perth",
     },
     {
       value: "ACST",
       label: "Australian Central Standard Time (ACST) – UTC+9:30",
-      zone: "Australia/Darwin",
     },
     {
       value: "ACDT",
       label: "Australian Central Daylight Time (ACDT) – UTC+10:30",
-      zone: "Australia/Adelaide",
     },
     {
       value: "AEST",
       label: "Australian Eastern Standard Time (AEST) – UTC+10",
-      zone: "Australia/Brisbane",
     },
     {
       value: "AEDT",
       label: "Australian Eastern Daylight Time (AEDT) – UTC+11",
-      zone: "Australia/Sydney",
     },
   ];
 
@@ -165,6 +142,35 @@ export default function AdminWebinarPage() {
             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-400"
           />
 
+          {/* Day */}
+          <select
+            name="day"
+            value={form.day}
+            onChange={handleChange}
+            required
+            className="w-full border border-gray-300 p-3 rounded-lg"
+          >
+            <option value="">Select Day</option>
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+            <option>Saturday</option>
+            <option>Sunday</option>
+          </select>
+
+          {/* Time */}
+          <input
+            type="time"
+            name="time"
+            value={form.time}
+            onChange={handleChange}
+            required
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-400"
+          />
+
+          {/* Timezone */}
           <select
             name="australiaTimeZone"
             value={form.australiaTimeZone}
@@ -180,16 +186,6 @@ export default function AdminWebinarPage() {
               </option>
             ))}
           </select>
-
-          {/* Date & Time */}
-          <input
-            type="datetime-local"
-            name="startDateTime"
-            value={form.startDateTime}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-400"
-          />
 
           <input
             type="text"
@@ -222,6 +218,7 @@ export default function AdminWebinarPage() {
         {/* ===================== */}
         {/* WEBINAR LIST */}
         {/* ===================== */}
+
         <div className="mt-12 space-y-6">
           {webinars.map((webinar) => (
             <div
@@ -233,12 +230,10 @@ export default function AdminWebinarPage() {
               </p>
 
               <p>
-                <strong>Date:</strong>{" "}
-                {new Date(webinar.startDateTime).toLocaleString("en-AU")}
+                <strong>Schedule:</strong>{" "}
+                {webinar.day} • {webinar.time} {webinar.australiaTimeZone}
               </p>
-              <p>
-                <strong>Base Timezone:</strong> {webinar.australiaTimeZone}
-              </p>
+
               <div className="mt-4">
                 <button
                   onClick={() => handleDelete(webinar._id)}
