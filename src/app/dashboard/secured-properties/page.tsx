@@ -1,294 +1,3 @@
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-// import toast from "react-hot-toast";
-
-// interface Property {
-//   _id: string;
-//   title: string;
-//   coverImage: string;
-//   galleryImages: string[];
-//   description: string;
-//   securedPrice: string;
-//   marketPrice: string;
-//   currentPrice: string;
-// }
-
-// export default function AdminSecuredProperties() {
-//   const API = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-//   const [properties, setProperties] = useState<Property[]>([]);
-//   const [title, setTitle] = useState("");
-//   const [description, setDescription] = useState("");
-//   const [securedPrice, setSecuredPrice] = useState("");
-//   const [marketPrice, setMarketPrice] = useState("");
-//   const [currentPrice, setCurrentPrice] = useState("");
-
-//   const [coverImage, setCoverImage] = useState<File | null>(null);
-//   const [galleryImages, setGalleryImages] = useState<File[]>([]);
-
-//   const [editing, setEditing] = useState<Property | null>(null);
-//   const [loading, setLoading] = useState(false);
-
-//   useEffect(() => {
-//     fetchData();
-//   }, []);
-
-//   const fetchData = async () => {
-//     try {
-//       const res = await axios.get(`${API}/api/secured-properties`);
-//       setProperties(res.data);
-//     } catch {
-//       toast.error("Failed to load properties");
-//     }
-//   };
-
-//   const resetForm = () => {
-//     setTitle("");
-//     setDescription("");
-//     setSecuredPrice("");
-//     setMarketPrice("");
-//     setCurrentPrice("");
-//     setCoverImage(null);
-//     setGalleryImages([]);
-//     setEditing(null);
-//   };
-
-//   // ================= ADD =================
-//   const addProperty = async () => {
-//     if (!title || !description || !coverImage) {
-//       toast.error("Please fill all required fields");
-//       return;
-//     }
-
-//     try {
-//       setLoading(true);
-
-//       const formData = new FormData();
-//       formData.append("title", title);
-//       formData.append("description", description);
-//       formData.append("securedPrice", securedPrice);
-//       formData.append("marketPrice", marketPrice);
-//       formData.append("currentPrice", currentPrice);
-
-//       formData.append("coverImage", coverImage);
-
-//       galleryImages.forEach((file) => {
-//         formData.append("galleryImages", file);
-//       });
-
-//       await axios.post(`${API}/api/secured-properties`, formData);
-
-//       toast.success("Property added successfully");
-//       resetForm();
-//       fetchData();
-//     } catch {
-//       toast.error("Failed to add property");
-//     }
-
-//     setLoading(false);
-//   };
-
-//   // ================= UPDATE =================
-//   const updateProperty = async () => {
-//     if (!editing) return;
-
-//     try {
-//       setLoading(true);
-
-//       const formData = new FormData();
-//       formData.append("title", title);
-//       formData.append("description", description);
-//       formData.append("securedPrice", securedPrice);
-//       formData.append("marketPrice", marketPrice);
-//       formData.append("currentPrice", currentPrice);
-
-//       if (coverImage) {
-//         formData.append("coverImage", coverImage);
-//       }
-
-//       galleryImages.forEach((file) => {
-//         formData.append("galleryImages", file);
-//       });
-
-//       await axios.put(
-//         `${API}/api/secured-properties/${editing._id}`,
-//         formData
-//       );
-
-//       toast.success("Property updated");
-//       resetForm();
-//       fetchData();
-//     } catch {
-//       toast.error("Update failed");
-//     }
-
-//     setLoading(false);
-//   };
-
-//   // ================= DELETE =================
-//   const deleteProperty = async (id: string) => {
-//     if (!confirm("Delete this property?")) return;
-
-//     try {
-//       await axios.delete(`${API}/api/secured-properties/${id}`);
-//       toast.success("Deleted successfully");
-//       fetchData();
-//     } catch {
-//       toast.error("Delete failed");
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gray-100 p-8">
-//       <div className="max-w-6xl mx-auto bg-white p-10 rounded-3xl shadow-xl space-y-8">
-
-//         <h1 className="text-3xl font-bold">
-//           Secured Properties Admin
-//         </h1>
-
-//         {/* FORM */}
-//         <div className="grid md:grid-cols-2 gap-4">
-
-//           <input
-//             placeholder="Title"
-//             value={title}
-//             onChange={(e) => setTitle(e.target.value)}
-//             className="border p-4 rounded-xl"
-//           />
-
-//           <textarea
-//             placeholder="Description"
-//             value={description}
-//             onChange={(e) => setDescription(e.target.value)}
-//             className="border p-4 rounded-xl col-span-2"
-//             rows={4}
-//           />
-
-//           <input
-//             placeholder="Secured Price"
-//             value={securedPrice}
-//             onChange={(e) => setSecuredPrice(e.target.value)}
-//             className="border p-4 rounded-xl"
-//           />
-
-//           <input
-//             placeholder="Market Price"
-//             value={marketPrice}
-//             onChange={(e) => setMarketPrice(e.target.value)}
-//             className="border p-4 rounded-xl"
-//           />
-
-//           <input
-//             placeholder="Current Price"
-//             value={currentPrice}
-//             onChange={(e) => setCurrentPrice(e.target.value)}
-//             className="border p-4 rounded-xl"
-//           />
-
-//           {/* Cover Image */}
-//           <div>
-//             <label className="block mb-2 font-medium">
-//               Cover Image (Card Only)
-//             </label>
-//             <input
-//               type="file"
-//               accept="image/*"
-//               onChange={(e) =>
-//                 e.target.files && setCoverImage(e.target.files[0])
-//               }
-//               className="border p-4 rounded-xl w-full"
-//             />
-//           </div>
-
-//           {/* Gallery Images */}
-//           <div>
-//             <label className="block mb-2 font-medium">
-//               Gallery Images (Modal)
-//             </label>
-//             <input
-//               type="file"
-//               accept="image/*"
-//               multiple
-//               onChange={(e) =>
-//                 e.target.files &&
-//                 setGalleryImages(Array.from(e.target.files))
-//               }
-//               className="border p-4 rounded-xl w-full"
-//             />
-//           </div>
-
-//           <button
-//             onClick={editing ? updateProperty : addProperty}
-//             disabled={loading}
-//             className="bg-black text-white rounded-xl py-4 col-span-2"
-//           >
-//             {loading
-//               ? "Processing..."
-//               : editing
-//               ? "Update Property"
-//               : "Add Property"}
-//           </button>
-//         </div>
-
-//         {/* LIST */}
-//         <div className="space-y-4">
-//           {properties.map((property) => (
-//             <div
-//               key={property._id}
-//               className="flex justify-between items-center bg-gray-50 p-6 rounded-xl"
-//             >
-//               <div className="flex items-center gap-6">
-//                 <img
-//                   src={property.coverImage}
-//                   className="w-20 h-16 object-cover rounded-lg"
-//                 />
-//                 <div>
-//                   <p className="font-semibold">
-//                     {property.title}
-//                   </p>
-//                   <p className="text-sm text-gray-500">
-//                     Secured: {property.securedPrice}
-//                   </p>
-//                 </div>
-//               </div>
-
-//               <div className="flex gap-3">
-//                 <button
-//                   onClick={() => {
-//                     setEditing(property);
-//                     setTitle(property.title);
-//                     setDescription(property.description);
-//                     setSecuredPrice(property.securedPrice);
-//                     setMarketPrice(property.marketPrice);
-//                     setCurrentPrice(property.currentPrice);
-//                   }}
-//                   className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-//                 >
-//                   Edit
-//                 </button>
-
-//                 <button
-//                   onClick={() => deleteProperty(property._id)}
-//                   className="bg-red-600 text-white px-4 py-2 rounded-lg"
-//                 >
-//                   Delete
-//                 </button>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -352,10 +61,10 @@ export default function AdminSecuredProperties() {
     }
   };
 
-  // ================= ADD =================
-  const addProperty = async () => {
-    if (!title || !description || !coverImage) {
-      toast.error("Please fill all required fields");
+  // ================= ADD / UPDATE =================
+  const submitProperty = async () => {
+    if (!title || !description) {
+      toast.error("Please fill required fields");
       return;
     }
 
@@ -368,22 +77,51 @@ export default function AdminSecuredProperties() {
       formData.append("securedPrice", securedPrice);
       formData.append("marketPrice", marketPrice);
       formData.append("currentPrice", currentPrice);
-      formData.append("coverImage", coverImage);
+
+      if (coverImage) {
+        formData.append("coverImage", coverImage);
+      }
 
       galleryImages.forEach((file) => {
         formData.append("galleryImages", file);
       });
 
-      await axios.post(`${API}/api/secured-properties`, formData);
+      if (editing) {
+        await axios.put(
+          `${API}/api/secured-properties/${editing._id}`,
+          formData,
+        );
+        toast.success("Property updated successfully");
+      } else {
+        if (!coverImage) {
+          toast.error("Cover image required");
+          setLoading(false);
+          return;
+        }
 
-      toast.success("Property added successfully");
+        await axios.post(`${API}/api/secured-properties`, formData);
+        toast.success("Property added successfully");
+      }
+
       resetForm();
       fetchData();
     } catch {
-      toast.error("Failed to add property");
+      toast.error("Operation failed");
     }
 
     setLoading(false);
+  };
+
+  // ================= EDIT =================
+  const editProperty = (property: Property) => {
+    setEditing(property);
+    setTitle(property.title);
+    setDescription(property.description);
+    setSecuredPrice(property.securedPrice);
+    setMarketPrice(property.marketPrice);
+    setCurrentPrice(property.currentPrice);
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // ================= DELETE =================
@@ -402,14 +140,10 @@ export default function AdminSecuredProperties() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-6xl mx-auto bg-white p-10 rounded-3xl shadow-xl space-y-8">
-
-        <h1 className="text-3xl font-bold">
-          Secured Properties Admin
-        </h1>
+        <h1 className="text-3xl font-bold">Secured Properties Admin</h1>
 
         {/* FORM */}
         <div className="grid md:grid-cols-2 gap-4">
-
           <input
             placeholder="Title"
             value={title}
@@ -448,9 +182,7 @@ export default function AdminSecuredProperties() {
 
           {/* Cover Image */}
           <div>
-            <label className="block mb-2 font-medium">
-              Cover Image (Card Only)
-            </label>
+            <label className="block mb-2 font-medium">Cover Image</label>
             <input
               type="file"
               accept="image/*"
@@ -461,11 +193,9 @@ export default function AdminSecuredProperties() {
             />
           </div>
 
-          {/* Gallery Images - ADD ONE BY ONE */}
+          {/* Gallery Images */}
           <div>
-            <label className="block mb-2 font-medium">
-              Gallery Images (Add One by One)
-            </label>
+            <label className="block mb-2 font-medium">Gallery Images</label>
 
             <input
               type="file"
@@ -479,7 +209,6 @@ export default function AdminSecuredProperties() {
                   }
                 }
 
-                // Clear input after selecting
                 if (galleryInputRef.current) {
                   galleryInputRef.current.value = "";
                 }
@@ -487,14 +216,10 @@ export default function AdminSecuredProperties() {
               className="border p-4 rounded-xl w-full"
             />
 
-            {/* Preview Section */}
             {galleryImages.length > 0 && (
               <div className="flex flex-wrap gap-4 mt-4">
                 {galleryImages.map((file, index) => (
-                  <div
-                    key={index}
-                    className="relative w-24 h-24"
-                  >
+                  <div key={index} className="relative w-24 h-24">
                     <img
                       src={URL.createObjectURL(file)}
                       className="w-full h-full object-cover rounded-lg"
@@ -504,7 +229,7 @@ export default function AdminSecuredProperties() {
                       type="button"
                       onClick={() =>
                         setGalleryImages((prev) =>
-                          prev.filter((_, i) => i !== index)
+                          prev.filter((_, i) => i !== index),
                         )
                       }
                       className="absolute top-1 right-1 bg-black text-white text-xs px-2 rounded-full"
@@ -518,11 +243,15 @@ export default function AdminSecuredProperties() {
           </div>
 
           <button
-            onClick={addProperty}
+            onClick={submitProperty}
             disabled={loading}
             className="bg-black text-white rounded-xl py-4 col-span-2"
           >
-            {loading ? "Processing..." : "Add Property"}
+            {loading
+              ? "Processing..."
+              : editing
+                ? "Update Property"
+                : "Add Property"}
           </button>
         </div>
 
@@ -539,25 +268,31 @@ export default function AdminSecuredProperties() {
                   className="w-20 h-16 object-cover rounded-lg"
                 />
                 <div>
-                  <p className="font-semibold">
-                    {property.title}
-                  </p>
+                  <p className="font-semibold">{property.title}</p>
                   <p className="text-sm text-gray-500">
                     Secured: {property.securedPrice}
                   </p>
                 </div>
               </div>
 
-              <button
-                onClick={() => deleteProperty(property._id)}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg"
-              >
-                Delete
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => editProperty(property)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => deleteProperty(property._id)}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
-
       </div>
     </div>
   );
